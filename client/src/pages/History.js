@@ -10,16 +10,15 @@ import resistanceIcon from "../assets/images/resistance.png";
 export default function History() {
   const [exerciseData, setExerciseData] = useState([]);
   const [displayedItems, setDisplayedItems] = useState(6);
-  const [currentDate, setCurrentDate] = useState('');
-
+  const [dates, setDates] = useState({});
   const loggedIn = Auth.loggedIn();
 
   useEffect(() => {
     const getUserData = async () => {
-      try {
-        const token = loggedIn ? Auth.getToken() : null;
-        if (!token) return;
+      if (!loggedIn) return;
 
+      try {
+        const token = Auth.getToken();
         const response = await getMe(token);
 
         if (!response.ok) {
@@ -30,14 +29,19 @@ export default function History() {
 
         if (user.cardio && user.resistance) {
           const exercise = [...user.cardio, ...user.resistance];
-
           exercise.sort((a, b) => new Date(b.date) - new Date(a.date));
-
           exercise.forEach(item => {
             item.date = formatDate(item.date);
           });
 
           setExerciseData(exercise);
+
+          // Update date mapping
+          const dateMap = {};
+          exercise.forEach(item => {
+            dateMap[item.date] = true;
+          });
+          setDates(dateMap);
         }
       } catch (err) {
         console.error(err);
@@ -64,13 +68,7 @@ export default function History() {
         {exerciseData.length > 0 ? (
           <div className='history-data'>
             {exerciseData.slice(0, displayedItems).map((exercise) => {
-              let dateToDisplay;
-              if (exercise.date !== currentDate) {
-                setCurrentDate(exercise.date);
-                dateToDisplay = exercise.date;
-              } else {
-                dateToDisplay = '';
-              }
+              const dateToDisplay = dates[exercise.date] ? exercise.date : '';
 
               return (
                 <div className='history-div d-flex' key={exercise._id}>
