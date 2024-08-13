@@ -1,13 +1,12 @@
 const router = require("express").Router();
-const path = require("path");
 const apiRoutes = require("./api");
 
+// Use API routes
 router.use("/api", apiRoutes);
 
-// connect with react router
-// serve up react front-end in production
+// Catch-all route for handling unknown routes (optional, adjust as needed)
 router.use((req, res) => {
-  res.sendFile(path.join(__dirname, "../build/index.html"));
+  res.status(404).send("Not Found");
 });
 
 module.exports = router;
